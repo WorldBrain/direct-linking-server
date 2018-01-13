@@ -3,12 +3,13 @@ var got = require('got')
 
 var db = require('../lib/app')
 
+var server = process.env.SERVER || 'http://localhost:3000'
 
 setTimeout(dotest, 1000)
 
 function dotest () {
   test('post one get one', function (t) {
-    got('http://localhost:3000', {
+    got(server, {
       json: true,
       body: {
         url: 'https://worldbrain.io/team',
@@ -20,7 +21,7 @@ function dotest () {
       (res, err) => {
         if (err) throw err
         console.log(res.body)
-        return got(`http://localhost:3000/${res.body.linkid}`)
+        return got(`${server}/${res.body.linkid}`)
       }
     ).then(
       (res, err) => {
