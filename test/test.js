@@ -1,0 +1,34 @@
+var test = require('tape')
+var got = require('got')
+
+var db = require('../lib/app')
+
+
+setTimeout(dotest, 1000)
+
+function dotest () {
+  test('post one get one', function (t) {
+    got('http://localhost:3000', {
+      json: true,
+      body: {
+        url: 'https://worldbrain.io/team',
+        title: 'test article',
+        selector: 'annotationselector',
+        quote: 'this is the full text of the selection'
+      }
+    }).then(
+      (res, err) => {
+        if (err) throw err
+        console.log(res.body)
+        return got(`http://localhost:3000/${res.body.linkid}`)
+      }
+    ).then(
+      (res, err) => {
+        if (err) throw err
+        console.log('GOT BODY')
+      }
+    ).catch(
+      err => console.error(err)
+    )
+  })
+}
