@@ -32,14 +32,50 @@ describe('Express app', () => {
       log.called = true
       log.req = req
       log.res = res
+      res.send('OK')
+    }
+  }
+
+  async function testRoute({name, path, params, post = null} : {name, path, params, post?}) {
+    const app = await initApp({[name]: createLoggerRoute()})
+    if (post) {
+      await (request(app)
+        .post(path)
+        .send(post))
+    } else {
+      await request(app)
+        .get(path)
+    }
+    expect(log.called).to.be.true
+    expect(log.req.params).to.contain(params)
+    
+    if (post) {
+      expect(log.req.body).to.deep.equal(post)
     }
   }
 
   it('should route proxy requests correctly', async () => {
-    const app = await initApp({proxy: createLoggerRoute()})
-    await request(app)
-      .get('/__/test')
-    expect(log.called).to.be.true
-    expect(log.req.params.url).to.equal('test/one/two')
-  })
+    await testRoute({
+      name: 'proxy',
+      path: '/__/test/one/two',
+      params: {url: 'test/one/two'}
+    })
+   })
+   
+   it('should route annotation retrievals correctly', async () => {
+    await testRoute({
+      name: 'retrieveAnnotation',
+      path: '/xyz/test.com/foo',
+      params: {id: 'xyz', url: 'test.com/foo'}
+    })
+   })
+   
+   it('should route annotation uploads correctly', async () => {
+    await testRoute({
+      name: 'putAnnotation',
+      path: '/',
+      params: {},
+      post: {annotation: {test: 'foo'}}
+    })
+   })
 })

@@ -16,8 +16,16 @@ export default function createApp(
 
   const app = express()
   app.use(bodyParser.json())
-  app.get('/__/:url', route(routes.proxy))
-  app.get('/:annotation-id/:url', route(routes.retrieveAnnotation))
-  app.post('/', route(routes.retrieveAnnotation))
+  app.get('/__/*', (req, res) => {
+    // TODO: Hack because no idea how to catch a wildcard in a param
+    req.params.url = req.path.substr('/__/'.length)
+    route(routes.proxy)(req, res)
+  })
+  app.get('/:id/*', (req, res) => {
+    // TODO: Hack because no idea how to catch a wildcard in a param
+    req.params.url = req.path.substr(req.params.id.length + '//'.length)
+    route(routes.retrieveAnnotation)(req, res)
+  })
+  app.post('/', route(routes.putAnnotation))
   return app
 }
