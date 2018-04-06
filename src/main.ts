@@ -1,9 +1,8 @@
 require('source-map-support').install()
 // require('regenerator-runtime/runtime')
 // import * as _ from 'lodash'
-// import * as URL from 'url-parse'
 // import * as path from 'path'
-// import * as http from 'http'
+import * as http from 'http'
 import createApp from './express/app'
 import { createAppComponents } from './components/index';
 import { createAppRoutes } from './express/routes/index';
@@ -36,17 +35,15 @@ export async function main(config = null) : Promise<any> {
     const routes = createAppRoutes(components)
     const app = createApp({routes})
 
-  //   const server = http.createServer(app)
-  //   await new Promise((resolve, reject) => {
-  //     server.listen(parseInt(process.env.IDENTITY_PORT) || 5678, (err) => {
-  //       if (err) { return reject(err) }
-  //       resolve(server)
-  //     })
-  //   })
+    const server = http.createServer(app)
+    await new Promise((resolve, reject) => {
+      server.listen(parseInt(process.env.PORT) || 5678, (err) => {
+        if (err) { return reject(err) }
+        resolve(server)
+      })
+    })
 
-  //   return server
-
-  console.log('!?!?!?!')
+    return server
 }
 
 if(require.main === module){

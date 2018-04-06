@@ -16,15 +16,21 @@ export interface AppComponents {
 
 export interface AppComponentsConfig {
   baseUrl : string
+  overrides? : object
 }
 
-export function createAppComponents({baseUrl} : AppComponentsConfig) : AppComponents {
+export function createAppComponents({baseUrl, overrides} : AppComponentsConfig) : AppComponents {
+  function allowOverride<T>(name : string, _default : () => T) : T {
+    const override = overrides && overrides[name]
+    return override ? override() : _default
+  }
+
   return {
-    annotationLinkBuilder: new AnnotationLinkBuilder({baseUrl}),
-    annotationStore: new MemoryAnnotationStore(),
-    annotationValidator: defaultAnnotationValidator,
-    documentRetriever: new SingleDocumentRetriever('test'),
-    linkReplacer: new RegexLinkReplacer(),
-    scriptInjector: new ScriptInjector()
+    annotationLinkBuilder: allowOverride('annotationLinkBuilder', () => new AnnotationLinkBuilder({baseUrl})),
+    annotationStore: allowOverride('annotationStore', () => new MemoryAnnotationStore()),
+    annotationValidator: allowOverride('annotationValidator', () => defaultAnnotationValidator),
+    documentRetriever: allowOverride('documentRetriever', () => new SingleDocumentRetriever('test')),
+    linkReplacer: allowOverride('linkReplacer', () => new RegexLinkReplacer()),
+    scriptInjector: allowOverride('scriptInjector', () => new ScriptInjector())
   }
 }
